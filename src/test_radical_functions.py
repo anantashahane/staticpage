@@ -1,7 +1,7 @@
 import unittest
 from textnode import TextNode, TextType
 from htmlnode import LeafNode
-from textnodetohtmlnode import text_node_to_html_node
+from radical_functions import text_node_to_html_node, split_nodes_delimiter
 
 class TestConversion(unittest.TestCase):
     def test_conversion(self):
@@ -26,3 +26,19 @@ class TestConversion(unittest.TestCase):
         textNode1 = TextNode("Bruh", None)
 
         self.assertRaises(Exception, text_node_to_html_node, textNode1)
+
+    def test_split_nodes_delimiter(self):
+        print("Testing Delimiter Execution.")
+        self.assertEqual(split_nodes_delimiter([TextNode("This is a **bold** text", TextType.NORMAL_TYPE)], "**", TextType.BOLD_TYPE),
+        [TextNode("This is a ", TextType.NORMAL_TYPE), TextNode("bold", TextType.BOLD_TYPE), TextNode(" text", TextType.NORMAL_TYPE)])
+
+        self.assertEqual(split_nodes_delimiter([TextNode("This is a _italic_ text", TextType.NORMAL_TYPE)], "_", TextType.ITALIC_TYPE),
+        [TextNode("This is a ", TextType.NORMAL_TYPE), TextNode("italic", TextType.ITALIC_TYPE), TextNode(" text", TextType.NORMAL_TYPE)])
+
+        self.assertEqual(split_nodes_delimiter([TextNode("This is a `code` text", TextType.NORMAL_TYPE)], "`", TextType.CODE_TYPE),
+        [TextNode("This is a ", TextType.NORMAL_TYPE), TextNode("code", TextType.CODE_TYPE), TextNode(" text", TextType.NORMAL_TYPE)])
+
+    def test_non_recursion(self):
+        print("Testing Delimiter Non Recursion.")
+        self.assertEqual(split_nodes_delimiter([TextNode("This is a **bold** text", TextType.BOLD_TYPE)], "**", TextType.BOLD_TYPE),
+        [TextNode("This is a **bold** text", TextType.BOLD_TYPE)])
