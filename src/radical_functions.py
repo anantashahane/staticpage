@@ -1,4 +1,4 @@
-from calendar import c
+import re
 from textnode import TextNode, TextType
 from htmlnode import LeafNode, ParentNode
 
@@ -32,8 +32,71 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             new_nodes.append(node)
     return new_nodes
 
+def extract_image_link(text):
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def extract_link(text):
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+def split_nodes_image(text_nodes):
+    new_nodes = []
+    for node in text_nodes:
+        text = node.text
+        pre_text = ""
+        links = extract_image_link(text)
+        if links:
+            for (alt, url) in links:
+                md_link = f"![{alt}]({url})"
+                try:
+                    pre_text, text = text.split(md_link)
+                except:
+                    text = ""
+                if pre_text:
+                    new_nodes.append(TextNode(pre_text, node.text_type))
+                new_nodes.append(TextNode(alt, TextType.IMAGE_TYPE, url=url))
+            if text:
+                new_nodes.append(TextNode(text, node.text_type))
+
+        else:
+            new_nodes.append(node)
+    return new_nodes
+
+def split_nodes_link(text_nodes):
+    new_nodes = []
+    for node in text_nodes:
+        text = node.text
+        pre_text = ""
+        links = extract_link(text)
+        if links:
+            for (alt, url) in links:
+                md_link = f"[{alt}]({url})"
+                try:
+                    pre_text, text = text.split(md_link)
+                except:
+                    text = ""
+                if pre_text:
+                    new_nodes.append(TextNode(pre_text, node.text_type))
+                new_nodes.append(TextNode(alt, TextType.LINK_TYPE, url=url))
+            if text:
+                new_nodes.append(TextNode(text, node.text_type))
+
+        else:
+            new_nodes.append(node)
+    return new_nodes
+
+def text_to_text_nodes(text):
+    nodes = [TextNode(text, TextType.NORMAL_TYPE)]
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD_TYPE)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC_TYPE)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE_TYPE)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
+
+
+
 
 if __name__ == "__main__":
-    print(split_nodes_delimiter([TextNode("This is text with a `code block` word.", TextType.NORMAL_TYPE),
-    TextNode("`func Factorial(n : Int) -> Int` returns `Int` which is a factorial of the input parameter.", TextType.NORMAL_TYPE)],
-    "`", TextType.CODE_TYPE))
+    text = "This is **bold font** with an _italic font_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+    for node in text_to_text_nodes(text):
+        print(node)

@@ -1,7 +1,7 @@
 import unittest
 from textnode import TextNode, TextType
 from htmlnode import LeafNode
-from radical_functions import text_node_to_html_node, split_nodes_delimiter
+from radical_functions import *
 
 class TestConversion(unittest.TestCase):
     def test_conversion(self):
@@ -42,3 +42,50 @@ class TestConversion(unittest.TestCase):
         print("Testing Delimiter Non Recursion.")
         self.assertEqual(split_nodes_delimiter([TextNode("This is a **bold** text", TextType.BOLD_TYPE)], "**", TextType.BOLD_TYPE),
         [TextNode("This is a **bold** text", TextType.BOLD_TYPE)])
+
+    def test_link_extractor(self):
+        print("Testing Link Extraction.")
+        matches = extract_image_link("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)")
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+
+        matches = extract_link("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)")
+        self.assertEqual([("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")], matches)
+
+    def test_link_node_splitter(self):
+        print("Testing Link splitting.")
+        nodes = [TextNode("This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+                            TextType.NORMAL_TYPE)]
+        matches = split_nodes_link(nodes)
+        self.assertEqual(
+            [TextNode("This is text with a link ", TextType.NORMAL_TYPE),
+            TextNode("to boot dev", TextType.LINK_TYPE, url="https://www.boot.dev"),
+            TextNode(" and ", TextType.NORMAL_TYPE),
+            TextNode("to youtube", TextType.LINK_TYPE, url="https://www.youtube.com/@bootdotdev")], matches)
+
+    def test_image_node_splitter(self):
+        print("Testing Image splitting.")
+        nodes = [TextNode("This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+                            TextType.NORMAL_TYPE)]
+        matches = split_nodes_image(nodes)
+        self.assertEqual(
+            [TextNode("This is text with an ", TextType.NORMAL_TYPE),
+            TextNode("image", TextType.IMAGE_TYPE, url="https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and another ", TextType.NORMAL_TYPE),
+            TextNode("second image", TextType.IMAGE_TYPE, url="https://i.imgur.com/3elNhQu.png")], matches)
+
+    def test_text_to_text_node(self):
+        print("Testing integrity.")
+        nodes = text_to_text_nodes("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)")
+        expected = [
+            TextNode("This is ", TextType.NORMAL_TYPE),
+            TextNode("text", TextType.BOLD_TYPE),
+            TextNode(" with an ", TextType.NORMAL_TYPE),
+            TextNode("italic", TextType.ITALIC_TYPE),
+            TextNode(" word and a ", TextType.NORMAL_TYPE),
+            TextNode("code block", TextType.CODE_TYPE),
+            TextNode(" and an ", TextType.NORMAL_TYPE),
+            TextNode("obi wan image", TextType.IMAGE_TYPE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.NORMAL_TYPE),
+            TextNode("link", TextType.LINK_TYPE, "https://boot.dev"),
+        ]
+        self.assertEqual(nodes, expected)
