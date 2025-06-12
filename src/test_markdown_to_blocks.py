@@ -1,5 +1,5 @@
 import unittest
-from markdown_to_blocks import block_type_of, markdown_to_blocks, BlockTypes
+from markdown_to_blocks import block_type_of, extract_title, markdown_to_blocks, BlockTypes
 
 
 class TestMarkdowntoBlock(unittest.TestCase):
@@ -131,3 +131,8 @@ This is the same paragraph on a new line
         self.assertEqual(block_type_of(quote), BlockTypes.Ordered_List)
         self.assertEqual(block_type_of(inline), BlockTypes.Paragraph)
         self.assertEqual(block_type_of(not_code), BlockTypes.Paragraph)
+
+    def test_extract_title(self):
+        self.assertEqual(extract_title("# I am batman "), "I am batman")
+        self.assertEqual(extract_title("#  I am catwoman "), "I am catwoman")
+        self.assertRaises(Exception, extract_title, ("Man, fuck that."))

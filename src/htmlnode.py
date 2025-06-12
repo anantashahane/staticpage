@@ -57,7 +57,7 @@ class ParentNode(HTMLNode):
             raise ValueError("Parent Node must have a tag.")
         if not self.children:
             raise ValueError("Childless Parent is un acceptable.")
-        return f"<{self.tag}{self.props_to_html()}>\n{'\n'.join(list(map(lambda object: object.to_html(), self.children)))}\n</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{'\n'.join(list(map(lambda object: object.to_html(), self.children)))}</{self.tag}>"
 
 if __name__ == "__main__":
     htmlnode = HTMLNode(props={

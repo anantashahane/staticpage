@@ -1,5 +1,9 @@
 import os
 import shutil
+import sys
+
+sys.path.append("./src/")
+
 from markdown_to_blocks import extract_title
 from markdown_to_html_node import markdown_to_html_node
 
@@ -35,29 +39,24 @@ def copy_static_files(source, destination):
 
 def generate_page(from_path, template_path, dest_path):
     print("*** Generating Page ***")
-    print(from_path, template_path, dest_path)
     for file in os.listdir(from_path):
         file_location = os.path.join(from_path, file)
         md_string = ""
         template = ""
-        if os.path.isfile(file_location):
-            with open(file_location) as f:
-                md_string = f.read()
-            with open(template_path) as f:
-                template = f.read()
-            content = markdown_to_html_node(md_string).to_html()
-            title = extract_title(md_string)
-            file_content = template.replace("{{ Title }}", title)
-            file_content = file_content.replace("{{ Content }}", content)
-            dest_file = os.path.join(dest_path, "index.html")
-            print(f"Writing {title}, to {dest_file}")
-            with open(dest_file, "x") as wf:
-                wf.write(file_content)
-        else:
-            dest = os.path.join(dest_path, file)
-            print(f"Building directory: {dest}")
-            os.mkdir(dest)
-            generate_page(file_location, template_path, dest)
+        with open(file_location) as f:
+            md_string = f.read()
+        with open(template_path) as f:
+            template = f.read()
+        content = markdown_to_html_node(md_string).to_html()
+        title = extract_title(md_string)
+        file_content = template.replace("{{ Title }}", title)
+        file_content = file_content.replace("{{ Content }}", content)
+        print(template)
+        dest_file = os.path.join(dest_path, "index.html")
+        print(f"Writing {title}, to {dest_file}")
+        with open(dest_file, "x") as wf:
+            wf.write(file_content)
+
 
 
 

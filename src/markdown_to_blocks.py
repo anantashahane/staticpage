@@ -45,6 +45,11 @@ def block_type_of(block):
     else:
         return BlockTypes.Paragraph
 
+def extract_title(document):
+    for block in document.split("\n\n"):
+        if block_type_of(block) == BlockTypes.Heading:
+            return block.split(" ", maxsplit=1)[1].strip()
+    raise Exception("Markdown without heading.")
 # if __name__ == "__main__":
 #     print(markdown_to_blocks("""
 # This is **bolded** paragraph
