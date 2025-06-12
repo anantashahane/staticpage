@@ -36,7 +36,6 @@ def copy_static_files(source, destination):
 
 def generate_page(from_path, template_path, dest_path, base_path):
     print("*** Generating Page ***")
-    print(from_path, template_path, dest_path)
     for file in os.listdir(from_path):
         file_location = os.path.join(from_path, file)
         md_string = ""
@@ -53,7 +52,7 @@ def generate_page(from_path, template_path, dest_path, base_path):
             file_content = file_content.replace('href="/', f'href="{base_path}')
             file_content = file_content.replace('src="/', f'src="{base_path}')
             dest_file = os.path.join(dest_path, "index.html")
-            print(f"Writing {title}, to {dest_file}")
+            print(f"\tWriting {title}, to {dest_file}")
             with open(dest_file, "x") as wf:
                 wf.write(file_content)
         else:
@@ -67,8 +66,7 @@ if __name__ == "__main__":
     base_path = "/"
     if len(sys.argv) == 2:
         base_path = sys.argv[1]
-    print(sys.argv)
-    print(base_path)
+    print(f"Building with base path {base_path}")
     clean_destination(DESTINATION)
     copy_static_files(SOURCE, DESTINATION)
     generate_page(FROM_PATH, TEMPLATE_PATH, DESTINATION_PATH, base_path)
