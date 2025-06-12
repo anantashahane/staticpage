@@ -8,10 +8,10 @@ from markdown_to_blocks import extract_title
 from markdown_to_html_node import markdown_to_html_node
 
 SOURCE = "./static/"
-DESTINATION = "./public/"
+DESTINATION = "./docs/"
 FROM_PATH = "./content/"
 TEMPLATE_PATH = "./template.html"
-DESTINATION_PATH = "./public/"
+DESTINATION_PATH = "./docs/"
 
 def clean_destination(destination):
     for file in os.listdir(destination):

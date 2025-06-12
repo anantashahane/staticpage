@@ -1,13 +1,14 @@
 import os
+import sys
 import shutil
 from markdown_to_blocks import extract_title
 from markdown_to_html_node import markdown_to_html_node
 
 SOURCE = "./static/"
-DESTINATION = "./public/"
+DESTINATION = "./docs/"
 FROM_PATH = "./content/"
 TEMPLATE_PATH = "./template.html"
-DESTINATION_PATH = "./public/"
+DESTINATION_PATH = "./docs/"
 
 def clean_destination(destination):
     for file in os.listdir(destination):
@@ -33,7 +34,7 @@ def copy_static_files(source, destination):
             print(f"Copying directory {source_file} to {destination_file}")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, base_path):
     print("*** Generating Page ***")
     print(from_path, template_path, dest_path)
     for file in os.listdir(from_path):
@@ -49,19 +50,25 @@ def generate_page(from_path, template_path, dest_path):
             title = extract_title(md_string)
             file_content = template.replace("{{ Title }}", title)
             file_content = file_content.replace("{{ Content }}", content)
+            file_content = file_content.replace('href="/', f'href="{base_path}')
+            file_content = file_content.replace('src="/', f'src="{base_path}')
             dest_file = os.path.join(dest_path, "index.html")
             print(f"Writing {title}, to {dest_file}")
             with open(dest_file, "x") as wf:
                 wf.write(file_content)
         else:
             dest = os.path.join(dest_path, file)
-            print(f"Building directory: {dest}")
             os.mkdir(dest)
-            generate_page(file_location, template_path, dest)
+            generate_page(file_location, template_path, dest, base_path)
 
 
 
 if __name__ == "__main__":
+    base_path = "/"
+    if len(sys.argv) == 2:
+        base_path = sys.argv[1]
+    print(sys.argv)
+    print(base_path)
     clean_destination(DESTINATION)
     copy_static_files(SOURCE, DESTINATION)
-    generate_page(FROM_PATH, TEMPLATE_PATH, DESTINATION_PATH)
+    generate_page(FROM_PATH, TEMPLATE_PATH, DESTINATION_PATH, base_path)
